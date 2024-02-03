@@ -1,8 +1,10 @@
 (function (global_this, global_window, global_self, module_withExports) {
 
   const akpa = {
-    version: '0.0.1',
-    stream
+    version: '0.0.2',
+    streamBuffer,
+    streamEvery,
+    mergeMap
   };
 
   if (module_withExports) {
@@ -55,13 +57,14 @@
         const yieldBuffer = buffer;
         buffer = [];
 
-        if (yieldBuffer.length > 0)
+        if (yieldBuffer.length > 0) {
           yield yieldBuffer;
 
-        const yieldCompleted = yieldCompletedTrigger;
-        yieldCompletedPromise = new Promise(resolve => yieldCompletedTrigger = resolve);
+          const yieldCompleted = yieldCompletedTrigger;
+          yieldCompletedPromise = new Promise(resolve => yieldCompletedTrigger = resolve);
 
-        yieldCompleted();
+          yieldCompleted();
+        }
       }
 
     } finally {
@@ -101,9 +104,31 @@
       stop = true;
       continueTrigger();
     }
+  }
 
-    function finallyFn() {
+  /**
+   * @template T
+   * @param {AsyncIterable<T[] | Iterable<T> | AsyncIterable<T>>} input
+   */
+  async function* mergeMap(input) {
+    for await (const item of input) {
+      for await (const subItem of item) {
+        yield subItem;
+      }
     }
+  }
+
+  /**
+   * @template T
+   * @param {({ yield, reject, complete, finally }: {
+   *  yield: (item: T) => Promise<void>,
+   *  reject: (error: Error) => void,
+   *  complete: () => void,
+   *  finally: Promise<void>
+   * }) => void } callback
+   */
+  function streamEvery(callback) {
+    return mergeMap(streamBuffer(callback));
   }
 
 })(

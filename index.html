@@ -27,21 +27,19 @@ body {
 
 <script src="https://unpkg.com/marked@11.2.0/lib/marked.umd.js"></script>
 <script>
-function md(markdown) {
-  var posHash = markdown.indexOf('#');
-  var posComment = markdown.lastIndexOf('<' + '!');
-  var stripped = markdown.slice(posHash + 1, posComment);
+  function md(markdown) {
+    var posHash = markdown.indexOf('#');
+    var posComment = markdown.lastIndexOf('<' + '!');
+    var stripped = markdown.slice(posHash + 1, posComment);
 
-  if (document.body) document.body.innerHTML = (marked.marked || marked)(stripped);
-  else window.onload = function() {
     document.body.innerHTML = (marked.marked || marked)(stripped);
-  };
-}
+  }
 </script>
-<script src="README.md"></script>
 
 </head>
 <body>
+
+<script src="README.md"></script>
   
 </body>
 </html>

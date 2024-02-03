@@ -2,23 +2,26 @@
 
 (function (global_this, global_window, global_self, module_withExports) {
 
-const version = '0.0.10';
+const version = '0.0.11';
 
 /**
  * @template T
+ * @template [TBuffer = T[]]
  * @param {(args: {
- *  yield: (item: T) => Promise<void>,
+ *  yield: (item: T, combine?: (item: T, buffer: TBuffer | undefined) => TBuffer) => Promise<void>,
  *  reject: (error: Error) => void,
  *  complete: () => void,
  *  finally: Promise<void>
  * }) => void } callback
- * @returns {AsyncGenerator<T[], void, unknown>}
+ * @returns {AsyncGenerator<TBuffer, void, unknown>}
  */
 async function* streamBuffer(callback) {
 
   let finallyTrigger = () => { };
   let stop = false;
-  let buffer = [];
+
+  /** @type {TBuffer | undefined} */
+  let buffer;
 
   let continueTrigger = () => { };
   /** @type {Promise<void>} */
@@ -48,9 +51,9 @@ async function* streamBuffer(callback) {
 
       continuePromise = new Promise(resolve => continueTrigger = resolve);
       const yieldBuffer = buffer;
-      buffer = [];
+      buffer = undefined;
 
-      if (yieldBuffer.length > 0) {
+      if (yieldBuffer) {
         yield yieldBuffer;
 
         const yieldCompleted = yieldPassedTrigger;
@@ -64,8 +67,11 @@ async function* streamBuffer(callback) {
     finallyTrigger();
   }
 
-  /** @param {T} item */
-  function yieldFn(item) {
+  /**
+   * @param {T} item
+   * @param {(item: T, buffer: TBuffer | undefined) => TBuffer} [combine]
+   */
+  function yieldFn(item, combine) {
     if (stop) {
       console.error('Cannot yield after complete.');
       return /** @type Promise<void> */(new Promise(resolve => resolve()));
@@ -75,7 +81,13 @@ async function* streamBuffer(callback) {
       return /** @type Promise<void> */(new Promise(resolve => resolve()));
     }
 
-    buffer.push(item);
+    if (typeof combine === 'function') {
+      buffer = combine(item, buffer);
+    } else {
+      if (!buffer) buffer = /** @type {TBuffer} */([]);
+      /** @type {*} */(buffer).push(item);
+    }
+
     continueTrigger();
 
     return yieldPassedPromise;

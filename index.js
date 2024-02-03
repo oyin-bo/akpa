@@ -2,13 +2,13 @@
 
 (function (global_this, global_window, global_self, module_withExports) {
 
-const version = '0.0.11';
+const version = '0.0.12';
 
 /**
  * @template T
  * @template [TBuffer = T[]]
  * @param {(args: {
- *  yield: (item: T, combine?: (item: T, buffer: TBuffer | undefined) => TBuffer) => Promise<void>,
+ *  yield: (item: T, combine?: (buffer: TBuffer | undefined, item: T) => TBuffer) => Promise<void>,
  *  reject: (error: Error) => void,
  *  complete: () => void,
  *  finally: Promise<void>
@@ -69,7 +69,7 @@ async function* streamBuffer(callback) {
 
   /**
    * @param {T} item
-   * @param {(item: T, buffer: TBuffer | undefined) => TBuffer} [combine]
+   * @param {(buffer: TBuffer | undefined, item: T) => TBuffer} [combine]
    */
   function yieldFn(item, combine) {
     if (stop) {
@@ -82,7 +82,7 @@ async function* streamBuffer(callback) {
     }
 
     if (typeof combine === 'function') {
-      buffer = combine(item, buffer);
+      buffer = combine(buffer, item);
     } else {
       if (!buffer) buffer = /** @type {TBuffer} */([]);
       /** @type {*} */(buffer).push(item);

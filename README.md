@@ -1,4 +1,4 @@
-![md(`](akpa-icon-128.png)
+![md(()=>{/*](akpa-icon-128.png)
 
 # AsynKronous Primitive Algebra
 
@@ -59,4 +59,4 @@ the `mergeMap*` function expects a child generator.
 
 These generators are all merged into output in the order of the parent generator.
 
-<!-- `)] // -->
+<!-- */})]// -->

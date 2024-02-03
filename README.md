@@ -17,6 +17,7 @@ async function* streamBuffer<T>(
       yield,
       reject,
       complete,
+      stop,
       finally }) => void
 ): AsyncGenerator<T[]>
 

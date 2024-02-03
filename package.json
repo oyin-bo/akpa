@@ -1,6 +1,6 @@
 {
   "name": "akpa",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "AKPA -  AsynKronous Primitive Algebra",
   "main": "index.js",
   "scripts": {

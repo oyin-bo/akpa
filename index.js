@@ -2,7 +2,7 @@
 
 (function (global_this, global_window, global_self, module_withExports) {
 
-const version = '0.0.12';
+const version = '0.0.13';
 
 /**
  * @template T
@@ -11,6 +11,7 @@ const version = '0.0.12';
  *  yield: (item: T, combine?: (buffer: TBuffer | undefined, item: T) => TBuffer) => Promise<void>,
  *  reject: (error: Error) => void,
  *  complete: () => void,
+ *  isEnded: boolean,
  *  finally: Promise<void>
  * }) => void } callback
  * @returns {AsyncGenerator<TBuffer, void, unknown>}
@@ -34,12 +35,16 @@ async function* streamBuffer(callback) {
   /** @type {{ error: Error } | undefined} */
   let rejectError;
 
-  callback({
+  /** @type {Parameters<typeof callback>[0]} */
+  const args = {
     yield: yieldFn,
     reject,
     complete,
+    isEnded: false,
     finally: new Promise(resolve => finallyTrigger = resolve)
-  });
+  };
+
+  callback(args);
 
   try {
     while (!stop) {
@@ -105,10 +110,12 @@ async function* streamBuffer(callback) {
     }
 
     rejectError = { error };
+    args.isEnded = true;
   }
 
   function complete() {
     stop = true;
+    args.isEnded = true;
     continueTrigger();
   }
 }
@@ -149,6 +156,7 @@ async function* mergeMap(input, project) {
  *  yield: (item: T) => Promise<void>,
  *  reject: (error: Error) => void,
  *  complete: () => void,
+ *  isEnded: boolean,
  *  finally: Promise<void>
  * }) => void } callback
  */

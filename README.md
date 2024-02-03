@@ -12,7 +12,12 @@
 
 ```ts
 async function* streamBuffer<T>(
-  callback: (arg: { yield, reject, complete, finally }) => void
+  callback:
+    (arg: {
+      yield,
+      reject,
+      complete,
+      finally }) => void
 ): AsyncGenerator<T[]>
 
 type StreamParameters = {

@@ -1,7 +1,7 @@
 (function (global_this, global_window, global_self, module_withExports) {
 
   const akpa = {
-    version: '0.0.2',
+    version: '0.0.3',
     streamBuffer,
     streamEvery,
     mergeMap
@@ -23,6 +23,7 @@
    *  complete: () => void,
    *  finally: Promise<void>
    * }) => void } callback
+   * @returns {AsyncGenerator<T[], void, unknown>}
    */
   async function* streamBuffer(callback) {
 
@@ -108,11 +109,28 @@
 
   /**
    * @template T
+   * @template [TProject = T]
    * @param {AsyncIterable<T[] | Iterable<T> | AsyncIterable<T>>} input
+   * @param {(item: T) => TProject} [project]
    */
-  async function* mergeMap(input) {
+  async function* map(input, project) {
     for await (const item of input) {
-      for await (const subItem of item) {
+      const mapped = project ? project(item) : item;
+      yield mapped;
+    }
+  }
+
+
+  /**
+   * @template T
+   * @template [TProject = T]
+   * @param {AsyncIterable<T[] | Iterable<T> | AsyncIterable<T>>} input
+   * @param {(item: T) => AsyncIterable<TProject[] | Iterable<TProject> | AsyncIterable<TProject>>} [project]
+   */
+  async function* mergeMap(input, project) {
+    for await (const item of input) {
+      const mapped = project ? project(item) : item;
+      for await (const subItem of mapped) {
         yield subItem;
       }
     }

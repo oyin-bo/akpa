@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> AsynKronous Primitive Algebra</title>
+<style>
+html {
+  background-image:
+    url(akpa-bg-effect.jpg),
+    url('data:image/jpeg;base64,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');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 60% 71%;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+}
+</style>
+
+<link rel="shortcut icon" href="akpa-icon-128.png" type="image/png">
+<link rel="icon" href="akpa-icon-128.png" type="image/png">
+<link rel="apple-touch-icon" href="akpa-icon-128.png" type="image/png">
+
+<script src="https://unpkg.com/marked@11.2.0/lib/marked.umd.js"></script>
+<script>
+function md(markdown) {
+  var posHash = markdown.indexOf('#');
+  var posComment = markdown.lastIndexOf('<' + '!');
+  var stripped = markdown.slice(posHash + 1, posComment);
+
+  if (document.body) document.body.innerHTML = (marked.marked || marked)(stripped);
+  else window.onload = function() {
+    document.body.innerHTML = (marked.marked || marked)(stripped);
+  };
+}
+</script>
+<script src="README.md"></script>
+
+</head>
+<body>
+  
+</body>
+</html>

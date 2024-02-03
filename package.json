@@ -1,0 +1,20 @@
+{
+  "name": "akpa",
+  "version": "0.0.1",
+  "description": "AKPA -  AsynKronous Primitive Algebra",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oyin-bo/akpa.git"
+  },
+  "keywords": [
+    "async", "await",
+    "iterator", "iteration", "generator",
+    "async/await", "async-iterators", "async-iteration", "async-generator", "async-iteration"],
+  "author": "Oleg Mihailik",
+  "license": "MIT",
+  "homepage": "https://oyin-bo/akpa"
+}

@@ -1,7 +1,7 @@
 (function (global_this, global_window, global_self, module_withExports) {
 
   const akpa = {
-    version: '0.0.6',
+    version: '0.0.7',
     streamBuffer,
     streamEvery,
     mergeMap

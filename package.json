@@ -1,6 +1,6 @@
 {
   "name": "akpa",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "AKPA -  AsynKronous Primitive Algebra",
   "main": "index.js",
   "scripts": {
@@ -16,5 +16,5 @@
     "async/await", "async-iterators", "async-iteration", "async-generator", "async-iteration"],
   "author": "Oleg Mihailik",
   "license": "MIT",
-  "homepage": "https://oyin-bo/akpa"
+  "homepage": "https://oyin.bo/akpa"
 }

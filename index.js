@@ -2,18 +2,24 @@
 
 (function (global_this, global_window, global_self, module_withExports) {
 
-const version = '0.0.13';
+const version = '0.0.14';
 
 /**
- * @template T
+ * @template [T=any]
  * @template [TBuffer = T[]]
- * @param {(args: {
+ * @typedef {{
  *  yield: (item: T, combine?: (buffer: TBuffer | undefined, item: T) => TBuffer) => Promise<void>,
  *  reject: (error: Error) => void,
  *  complete: () => void,
  *  isEnded: boolean,
  *  finally: Promise<void>
- * }) => void } callback
+ * }} StreamParameters
+ */
+
+/**
+ * @template [T=any]
+ * @template [TBuffer = T[]]
+ * @param {(args: StreamParameters<T, TBuffer>) => void } callback
  * @returns {AsyncGenerator<TBuffer, void, unknown>}
  */
 async function* streamBuffer(callback) {
@@ -152,13 +158,7 @@ async function* mergeMap(input, project) {
 
 /**
  * @template T
- * @param {(arg: {
- *  yield: (item: T) => Promise<void>,
- *  reject: (error: Error) => void,
- *  complete: () => void,
- *  isEnded: boolean,
- *  finally: Promise<void>
- * }) => void } callback
+ * @param {(arg: StreamParameters<T>) => void } callback
  */
 function streamEvery(callback) {
   return mergeMap(streamBuffer(callback));

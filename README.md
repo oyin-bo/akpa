@@ -17,7 +17,7 @@ async function* streamBuffer<T>(
       yield,
       reject,
       complete,
-      stop,
+      isEnded,
       finally }) => void
 ): AsyncGenerator<T[]>
 
@@ -25,6 +25,7 @@ type StreamParameters = {
   yield: (item: T) => Promise<void>,
   reject: (error: Error) => void,
   complete: () => void,
+  isEnded: boolean,
   finally: Promise<void>
 }
 ```
@@ -42,6 +43,8 @@ The callback receives 4 facilities to drive the generation:
 * `complete()` <br>
   compeltes the async generator, which will reach the consumer
   only after all the already buffered entries are consumed <br>&nbsp;
+* `isEnded: boolean` <br>
+  indicating that generator is ended -- letting you bail out from complex logic early <br>&nbsp;
 * `finally: Promise` <br>
   this promise will settle after the async generator ends
   (whether by consumer or producer, successfully or by error)

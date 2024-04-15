@@ -2,13 +2,13 @@
 
 (function (global_this, global_window, global_self, module_withExports) {
 
-const version = '0.0.14';
+const version = '0.0.15';
 
 /**
  * @template [T=any]
  * @template [TBuffer = T[]]
  * @typedef {{
- *  yield: (item: T, combine?: (buffer: TBuffer | undefined, item: T) => TBuffer) => Promise<void>,
+ *  yield: (item: T, combine?: (buffer: TBuffer | undefined, item?: T) => TBuffer) => Promise<void>,
  *  reject: (error: Error) => void,
  *  complete: () => void,
  *  isEnded: boolean,
@@ -22,9 +22,9 @@ const version = '0.0.14';
  * @param {(args: StreamParameters<T, TBuffer>) => void } callback
  * @returns {AsyncGenerator<TBuffer, void, unknown>}
  */
-async function* streamBuffer(callback) {
+function streamBuffer(callback) {
 
-  let finallyTrigger = () => { };
+  let finallyTrigger = () => { args.isEnded = true; };
   let stop = false;
 
   /** @type {TBuffer | undefined} */
@@ -32,7 +32,7 @@ async function* streamBuffer(callback) {
 
   let continueTrigger = () => { };
   /** @type {Promise<void>} */
-  let continuePromise = new Promise(resolve => continueTrigger = resolve);
+  let continuePromise = new Promise(resolve => continueTrigger = function continueTriggerInitiallySet() { resolve() });
 
   let yieldPassedTrigger = () => { };
   /** @type {Promise<void>} */
@@ -47,35 +47,48 @@ async function* streamBuffer(callback) {
     reject,
     complete,
     isEnded: false,
-    finally: new Promise(resolve => finallyTrigger = resolve)
+    finally: new Promise(resolve => {
+      finallyTrigger = () => {
+        args.isEnded = true;
+        resolve();
+      };
+    })
   };
 
   callback(args);
 
-  try {
-    while (!stop) {
+  return iterate();
 
-      await continuePromise;
-      if (rejectError)
-        throw rejectError.error;
-      if (stop) return;
+  /**
+   * @returns {AsyncGenerator<TBuffer, void, unknown>}
+   */
+  async function* iterate() {
 
-      continuePromise = new Promise(resolve => continueTrigger = resolve);
-      const yieldBuffer = buffer;
-      buffer = undefined;
+    try {
+      while (!stop) {
 
-      if (yieldBuffer) {
-        yield yieldBuffer;
+        await continuePromise;
+        if (rejectError)
+          throw rejectError.error;
+        if (stop) return;
 
-        const yieldCompleted = yieldPassedTrigger;
-        yieldPassedPromise = new Promise(resolve => yieldPassedTrigger = resolve);
+        continuePromise = new Promise(resolve => continueTrigger = function continueTriggerSubsequentlySet() { resolve() });
+        const yieldBuffer = buffer;
+        buffer = undefined;
 
-        yieldCompleted();
+        if (yieldBuffer) {
+          yield yieldBuffer;
+
+          const yieldCompleted = yieldPassedTrigger;
+          yieldPassedPromise = new Promise(resolve => yieldPassedTrigger = resolve);
+
+          yieldCompleted();
+        }
       }
-    }
 
-  } finally {
-    finallyTrigger();
+    } finally {
+      finallyTrigger();
+    }
   }
 
   /**
@@ -96,7 +109,7 @@ async function* streamBuffer(callback) {
       buffer = combine(buffer, item);
     } else {
       if (!buffer) buffer = /** @type {TBuffer} */([]);
-      /** @type {*} */(buffer).push(item);
+    /** @type {*} */(buffer).push(item);
     }
 
     continueTrigger();
@@ -158,7 +171,12 @@ async function* mergeMap(input, project) {
 
 /**
  * @template T
- * @param {(arg: StreamParameters<T>) => void } callback
+ * @param {(arg: {
+ *  yield: (item: T) => Promise<void>,
+ *  reject: (error: Error) => void,
+ *  complete: () => void,
+ *  finally: Promise<void>
+ * }) => void } callback
  */
 function streamEvery(callback) {
   return mergeMap(streamBuffer(callback));
